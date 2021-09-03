@@ -90,13 +90,13 @@ aws s3api create-bucket \
 ## Install and start Velero
 
 velero install \
-     --provider aws \
-     --plugins velero/velero-plugin-for-aws:v1.2.0 \
-     --bucket velero-bucket-nitin \
-     --backup-location-config region=us-west-2 \
-     --snapshot-location-config region=us-west-2 \
-     --use-restic \
-     --secret-file ./credentials-velero
+         --provider aws \
+         --plugins velero/velero-plugin-for-aws:v1.2.0 \
+         --bucket velero-bucket-nitin \
+         --backup-location-config region=us-west-2 \
+         --snapshot-location-config region=us-west-2 \
+         --use-restic \
+         --secret-file ./credentials-velero
 
 
 ### Prerequisites
@@ -115,10 +115,10 @@ Once the bucket and credentials have been configured, these can be used to creat
 
 
 velero backup-location create backup \
- --provider aws \
- --bucket velero-bucket-nitin \
- --config region=us-west-2 \
- --credential=bsl-credentials=aws
+     --provider aws \
+     --bucket velero-bucket-nitin \
+     --config region=us-west-2 \
+     --credential=bsl-credentials=aws
 
 
 ### annotate the drives
