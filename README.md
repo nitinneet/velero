@@ -1,5 +1,3 @@
-[![Build Status][101]][102]
-
 # Velero plugins for AWS
 
 ## Overview
