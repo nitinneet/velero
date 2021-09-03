@@ -1,16 +1,21 @@
 # Velero with Aws
 
+### Prerequisites
+```bash
+* Velero 1.6.0 or later
+* AWS plugin must be installed, either at install time, or by running `velero plugin add velero/velero-plugin-for-aws:v1.2.0
+```
 ## Overview
-
+```bash
 This repository contains these plugins to support running Velero on AWS:
 
 - An object store plugin for persisting and retrieving backups on AWS S3. Content of backup is log files, warning/error files, restore logs.
 
 - A volume snapshotter plugin for creating snapshots from volumes (during a backup) and volumes from snapshots (during a restore) on AWS EBS.
-
+```
 
 ## Compatibility
-
+```bash
 Below is a listing of plugin versions and respective Velero versions that are compatible.
 
 | Plugin Version  | Velero Version |
@@ -20,7 +25,7 @@ Below is a listing of plugin versions and respective Velero versions that are co
 | v1.1.x          | v1.4.x         |
 | v1.0.x          | v1.3.x         |
 | v1.0.x          | v1.2.0         |
-
+```
 
 ## Setup
 
@@ -80,7 +85,7 @@ aws s3api create-bucket \
                     "s3:ListMultipartUploadParts"
                 ],
                 "Resource": [
-                    "arn:aws:s3:::${BUCKET}/*"
+                    "arn:aws:s3:::velero-bucket-nitin/*"
                 ]
             },
             {
@@ -89,7 +94,7 @@ aws s3api create-bucket \
                     "s3:ListBucket"
                 ],
                 "Resource": [
-                    "arn:aws:s3:::${BUCKET}"
+                    "arn:aws:s3:::velero-bucket-nitin"
                 ]
             }
         ]
@@ -131,8 +136,6 @@ aws s3api create-bucket \
     aws_secret_access_key=<AWS_SECRET_ACCESS_KEY>
     ```
 
-    where the access key id and secret are the values returned from the `create-access-key` request.
-    ```
 
 ## Install and start Velero
 
@@ -146,11 +149,6 @@ aws s3api create-bucket \
      --use-restic \
      --secret-file ./credentials-velero
 ```
-
-### Prerequisites
-
-* Velero 1.6.0 or later
-* AWS plugin must be installed, either at install time, or by running `velero plugin add velero/velero-plugin-for-aws:v1.2.0`
 
 ### Configure S3 bucket and credentials
 
