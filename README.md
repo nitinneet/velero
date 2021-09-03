@@ -21,19 +21,16 @@ Below is a listing of plugin versions and respective Velero versions that are co
 | v1.0.x          | v1.3.x         |
 | v1.0.x          | v1.2.0         |
 
-## Filing issues
-
-If you would like to file a GitHub issue for the plugin, please open the issue on the [core Velero repo][103]
-
 
 ## Setup
 
+```bash
 To set up Velero on AWS, you:
 
-* [Create an S3 bucket][1]
-* [Set permissions for Velero][2]
-* [Install and start Velero][3]
-
+Create an S3 bucket
+Set permissions for Velero
+Install and start Velero
+```
 
 ## Create S3 bucket
 
