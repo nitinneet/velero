@@ -173,13 +173,17 @@ velero backup-location create backup \
      --credential=bsl-credentials=aws
 ```
 
-### Driver snapshots
+### Driver snapshots:
+```bash
 kubectl -n wordpress annotate pod/wordpress-cd444bcd7-z28wr backup.velero.io/backup-volumes=wordpress-persistent-storage
 kubectl -n wordpress annotate pod/wordpress-mysql-55ffc4bb89-nx2rc backup.velero.io/backup-volumes=mysql-persistent-storage
+```
 
 ### velero commands:
+```bash
 velero backup-location get
 velero backup get
 velero backup create wordpress-backup --include-namespaces wordpress --wait
 velero restore create --from-backup wordpress-backup
 velero schedule create <SCHEDULE_NAME> --schedule="@daily"
+```
