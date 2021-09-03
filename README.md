@@ -34,41 +34,87 @@ To set up Velero on AWS, you:
 * [Set permissions for Velero][2]
 * [Install and start Velero][3]
 
-You can also use this plugin to [migrate PVs across clusters][5] or create an additional [Backup Storage Location][12].
-
-If you do not have the `aws` CLI locally installed, follow the [user guide][6] to set it up.
 
 ## Create S3 bucket
 
+```bash
 aws s3api create-bucket \
     --bucket velero-bucket-nitin \
     --region us-west-2
+```
 
+## Set permissions for Velero
+
+### Option 1: Set permissions with an IAM user
 
 1. Create the IAM user:
 
+    ```bash
     aws iam create-user --user-name velero
+    ```
+
 
 2. Attach policies to give `velero` the necessary permissions:
 
-    
-    cat > velero-policy.json ------> check at the top
-    
+    ```
+    cat > velero-policy.json <<EOF
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ec2:DescribeVolumes",
+                    "ec2:DescribeSnapshots",
+                    "ec2:CreateTags",
+                    "ec2:CreateVolume",
+                    "ec2:CreateSnapshot",
+                    "ec2:DeleteSnapshot"
+                ],
+                "Resource": "*"
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "s3:GetObject",
+                    "s3:DeleteObject",
+                    "s3:PutObject",
+                    "s3:AbortMultipartUpload",
+                    "s3:ListMultipartUploadParts"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::${BUCKET}/*"
+                ]
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "s3:ListBucket"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::${BUCKET}"
+                ]
+            }
+        ]
+    }
+    EOF
+    ```
+    ```bash
     aws iam put-user-policy \
       --user-name velero \
       --policy-name velero \
       --policy-document file://velero-policy.json
-    
+    ```
 
 3. Create an access key for the user:
 
-    
+    ```bash
     aws iam create-access-key --user-name velero
-    
+    ```
 
-    **The result should look like**:
+    The result should look like:
 
-    
+    ```json
     {
       "AccessKey": {
             "UserName": "velero",
@@ -78,26 +124,31 @@ aws s3api create-bucket \
             "AccessKeyId": <AWS_ACCESS_KEY_ID>
       }
     }
-    
+    ```
 
 4. Create a Velero-specific credentials file (`credentials-velero`) in your local directory:
 
+    ```bash
     [default]
     aws_access_key_id=<AWS_ACCESS_KEY_ID>
     aws_secret_access_key=<AWS_SECRET_ACCESS_KEY>
+    ```
 
+    where the access key id and secret are the values returned from the `create-access-key` request.
+    ```
 
 ## Install and start Velero
 
-velero install \
-         --provider aws \
-         --plugins velero/velero-plugin-for-aws:v1.2.0 \
-         --bucket velero-bucket-nitin \
-         --backup-location-config region=us-west-2 \
-         --snapshot-location-config region=us-west-2 \
-         --use-restic \
-         --secret-file ./credentials-velero
-
+```bash
+  velero install \
+     --provider aws \
+     --plugins velero/velero-plugin-for-aws:v1.2.0 \
+     --bucket velero-bucket-nitin \
+     --backup-location-config region=us-west-2 \
+     --snapshot-location-config region=us-west-2 \
+     --use-restic \
+     --secret-file ./credentials-velero
+```
 
 ### Prerequisites
 
@@ -106,26 +157,27 @@ velero install \
 
 ### Configure S3 bucket and credentials
 
+```bash
 kubectl create secret generic -n velero bsl-credentials --from-file=aws=credentials-velero
-
+```
 
 ### Create Backup Storage Location
 
 Once the bucket and credentials have been configured, these can be used to create the new Backup Storage Location:
 
-
+```bash
 velero backup-location create backup \
      --provider aws \
      --bucket velero-bucket-nitin \
      --config region=us-west-2 \
      --credential=bsl-credentials=aws
+```
 
-
-### annotate the drives
+### Driver snapshots
 kubectl -n wordpress annotate pod/wordpress-cd444bcd7-z28wr backup.velero.io/backup-volumes=wordpress-persistent-storage
 kubectl -n wordpress annotate pod/wordpress-mysql-55ffc4bb89-nx2rc backup.velero.io/backup-volumes=mysql-persistent-storage
 
-### Velero commands
+### velero commands:
 velero backup-location get
 velero backup get
 velero backup create wordpress-backup --include-namespaces wordpress --wait
