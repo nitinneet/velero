@@ -1,4 +1,4 @@
-# Velero plugins for AWS
+# Velero with Aws
 
 ## Overview
 
