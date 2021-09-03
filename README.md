@@ -40,48 +40,35 @@ If you do not have the `aws` CLI locally installed, follow the [user guide][6] t
 
 ## Create S3 bucket
 
-Velero requires an object storage bucket to store backups in, preferably unique to a single Kubernetes cluster (see the [FAQ][11] for more details). Create an S3 bucket, replacing placeholders appropriately:
-
-
 aws s3api create-bucket \
     --bucket velero-bucket-nitin \
     --region us-west-2
-```
 
-## Set permissions for Velero
-
-### Option 1: Set permissions with an IAM user
-
-For more information, see [the AWS documentation on IAM users][10].
 
 1. Create the IAM user:
 
-    ```bash
     aws iam create-user --user-name velero
-    ```
-
-    If you'll be using Velero to backup multiple clusters with multiple S3 buckets, it may be desirable to create a unique username per cluster rather than the default `velero`.
 
 2. Attach policies to give `velero` the necessary permissions:
 
-    ```
+    
     cat > velero-policy.json ------> check at the top
     
     aws iam put-user-policy \
       --user-name velero \
       --policy-name velero \
       --policy-document file://velero-policy.json
-    ```
+    
 
 3. Create an access key for the user:
 
-    ```bash
+    
     aws iam create-access-key --user-name velero
-    ```
+    
 
     **The result should look like**:
 
-    ```json
+    
     {
       "AccessKey": {
             "UserName": "velero",
@@ -91,28 +78,17 @@ For more information, see [the AWS documentation on IAM users][10].
             "AccessKeyId": <AWS_ACCESS_KEY_ID>
       }
     }
-    ```
+    
 
 4. Create a Velero-specific credentials file (`credentials-velero`) in your local directory:
 
-    ```bash
     [default]
     aws_access_key_id=<AWS_ACCESS_KEY_ID>
     aws_secret_access_key=<AWS_SECRET_ACCESS_KEY>
-    ```
-
-    where the access key id and secret are the values returned from the `create-access-key` request.
 
 
 ## Install and start Velero
 
-[Download][4] Velero
-
-Install Velero, including all prerequisites, into the cluster and start the deployment. This will create a namespace called `velero`, and place a deployment named `velero` in it.
-
-**If using IAM user and access key**:
-
-```bash
 velero install \
      --provider aws \
      --plugins velero/velero-plugin-for-aws:v1.2.0 \
@@ -121,7 +97,7 @@ velero install \
      --snapshot-location-config region=us-west-2 \
      --use-restic \
      --secret-file ./credentials-velero
-```
+
 
 ### Prerequisites
 
@@ -130,28 +106,28 @@ velero install \
 
 ### Configure S3 bucket and credentials
 
-To configure a new Backup Storage Location with its own credentials, it is necessary to follow the steps above to [create the bucket to use][15] and to [generate the credentials file][16] to interact with that bucket.
-Once you have created the credentials file, create a [Kubernetes Secret][17] in the Velero namespace that contains these credentials:
-
-```bash
 kubectl create secret generic -n velero bsl-credentials --from-file=aws=credentials-velero
-```
 
-This will create a secret named `bsl-credentials` with a single key (`aws`) which contains the contents of your credentials file.
-The name and key of this secret will be given to Velero when creating the Backup Storage Location, so it knows which secret data to use.
 
 ### Create Backup Storage Location
 
 Once the bucket and credentials have been configured, these can be used to create the new Backup Storage Location:
 
-```bash
-velero backup-location create **backup** \
+
+velero backup-location create backup \
  --provider aws \
  --bucket velero-bucket-nitin \
  --config region=us-west-2 \
  --credential=bsl-credentials=aws
-```
 
-```bash
+
+### annotate the drives
+kubectl -n wordpress annotate pod/wordpress-cd444bcd7-z28wr backup.velero.io/backup-volumes=wordpress-persistent-storage
+kubectl -n wordpress annotate pod/wordpress-mysql-55ffc4bb89-nx2rc backup.velero.io/backup-volumes=mysql-persistent-storage
+
+### Velero commands
 velero backup-location get
-```
+velero backup get
+velero backup create wordpress-backup --include-namespaces wordpress --wait
+velero restore create --from-backup wordpress-backup
+velero schedule create <SCHEDULE_NAME> --schedule="@daily"
