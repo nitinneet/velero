@@ -5,7 +5,7 @@
 * Velero 1.6.0 or later
 * AWS plugin must be installed, either at install time, or by running `velero plugin add velero/velero-plugin-for-aws:v1.2.0
 ```
-## What all the thing will be covering in DR kubernetes
+## What all the things will be covered in DR kubernetes
 ```bash
 1). Deploying two sample applications & PV/PVC, Pods/Deploy, Replicas, cofigmapps, secrets
 2). Configuring and deploying Velero.
