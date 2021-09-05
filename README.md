@@ -1,17 +1,19 @@
-# Velero with Aws
+# Velero with EKS
 
 ### Prerequisites
 ```bash
 * Velero 1.6.0 or later
 * AWS plugin must be installed, either at install time, or by running `velero plugin add velero/velero-plugin-for-aws:v1.2.0
 ```
-## Overview
+## What all the thing will be covering in DR kubernetes
 ```bash
-This repository contains these plugins to support running Velero on AWS:
-
-- An object store plugin for persisting and retrieving backups on AWS S3. Content of backup is log files, warning/error files, restore logs.
-
-- A volume snapshotter plugin for creating snapshots from volumes (during a backup) and volumes from snapshots (during a restore) on AWS EBS.
+1). Deploying two sample applications & PV/PVC, Pods/Deploy, Replicas, cofigmapps, secrets
+2). Configuring and deploying Velero.
+3). Creating S3 bucket for storing cluster backup.
+4). Creating IAM user (Velero) and attaching right policies with it.
+5). Taking application backup.
+6). Destroying current cluster.
+7). Restore all the applications & PV/PVC, Pods/Deploy, Replicas, cofigmapps, secrets to the new kubernetes cluster.
 ```
 
 ## Compatibility
